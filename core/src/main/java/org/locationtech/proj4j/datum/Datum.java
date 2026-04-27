@@ -23,7 +23,6 @@ import static org.locationtech.proj4j.util.ProjectionMath.isIdentity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.locationtech.proj4j.ProjCoordinate;
 
@@ -150,9 +149,8 @@ public class Datum implements java.io.Serializable {
     public int getTransformType() {
         if (grids != null && grids.size() > 0) return TYPE_GRIDSHIFT;
 
-        if (Ellipsoid.WGS84.equals(ellipsoid) || Ellipsoid.GRS80.equals(ellipsoid)) {
+       if (Ellipsoid.WGS84.isEqual(ellipsoid) || Ellipsoid.GRS80.isEqual(ellipsoid)) {
             if (transform == null) return TYPE_WGS84;
-
             if (isIdentity(transform)) return TYPE_WGS84;
         }
 

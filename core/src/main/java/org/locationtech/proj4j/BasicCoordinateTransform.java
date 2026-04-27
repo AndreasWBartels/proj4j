@@ -15,7 +15,11 @@
  */
 package org.locationtech.proj4j;
 
+import java.util.Objects;
+import java.util.stream.DoubleStream;
+
 import org.locationtech.proj4j.datum.*;
+import org.locationtech.proj4j.util.ProjectionMath;
 
 /**
  * Represents the operation of transforming
