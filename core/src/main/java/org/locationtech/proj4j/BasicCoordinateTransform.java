@@ -15,7 +15,11 @@
  */
 package org.locationtech.proj4j;
 
+import java.util.Objects;
+import java.util.stream.DoubleStream;
+
 import org.locationtech.proj4j.datum.*;
+import org.locationtech.proj4j.util.ProjectionMath;
 
 /**
  * Represents the operation of transforming
@@ -185,16 +189,33 @@ public class BasicCoordinateTransform implements CoordinateTransform {
         /* -------------------------------------------------------------------- */
         /*      Short cut if the datums are identical.                          */
         /* -------------------------------------------------------------------- */
-        if (srcCRS.getDatum().isEqual(tgtCRS.getDatum())
-                || srcCRS.getDatum().getTransformType() == Datum.TYPE_UNKNOWN
-                || tgtCRS.getDatum().getTransformType() == Datum.TYPE_UNKNOWN)
+        int srcCrsDatumTransformType = srcCRS.getDatum().getTransformType();
+        int tgtCrsDatumTransformType = tgtCRS.getDatum().getTransformType();
+        if (srcCRS.getDatum().isEqual(tgtCRS.getDatum())) {
+          return;
+        }
+
+        if (srcCRS.getDatum().getEllipsoid().isEqual(tgtCRS.getDatum().getEllipsoid())) {
+          if (srcCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
             return;
+          }
+          if (tgtCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
+            return;
+          }
+        }
+
+        if (srcCrsDatumTransformType == Datum.TYPE_WGS84 && tgtCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
+          return;
+        }
+        if (srcCrsDatumTransformType == Datum.TYPE_UNKNOWN && tgtCrsDatumTransformType == Datum.TYPE_WGS84) {
+          return;
+        }
 
         /* -------------------------------------------------------------------- */
         /*	If this datum requires grid shifts, then apply it to geodetic    */
         /*      coordinates.                                                    */
         /* -------------------------------------------------------------------- */
-        if (srcCRS.getDatum().getTransformType() == Datum.TYPE_GRIDSHIFT) {
+        if (srcCrsDatumTransformType == Datum.TYPE_GRIDSHIFT) {
             srcCRS.getDatum().shift(pt);
         }
 
@@ -227,7 +248,7 @@ public class BasicCoordinateTransform implements CoordinateTransform {
         /* -------------------------------------------------------------------- */
         /*      Apply grid shift to destination if required.                    */
         /* -------------------------------------------------------------------- */
-        if (tgtCRS.getDatum().getTransformType() == Datum.TYPE_GRIDSHIFT) {
+        if (tgtCrsDatumTransformType == Datum.TYPE_GRIDSHIFT) {
             tgtCRS.getDatum().inverseShift(pt);
         }
     }
