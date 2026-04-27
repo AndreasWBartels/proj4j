@@ -185,33 +185,16 @@ public class BasicCoordinateTransform implements CoordinateTransform {
         /* -------------------------------------------------------------------- */
         /*      Short cut if the datums are identical.                          */
         /* -------------------------------------------------------------------- */
-        int srcCrsDatumTransformType = srcCRS.getDatum().getTransformType();
-        int tgtCrsDatumTransformType = tgtCRS.getDatum().getTransformType();
-        if (srcCRS.getDatum().isEqual(tgtCRS.getDatum())) {
-          return;
-        }
-
-        if (srcCRS.getDatum().getEllipsoid().isEqual(tgtCRS.getDatum().getEllipsoid())) {
-          if (srcCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
+        if (srcCRS.getDatum().isEqual(tgtCRS.getDatum())
+                || srcCRS.getDatum().getTransformType() == Datum.TYPE_UNKNOWN
+                || tgtCRS.getDatum().getTransformType() == Datum.TYPE_UNKNOWN)
             return;
-          }
-          if (tgtCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
-            return;
-          }
-        }
-
-        if (srcCrsDatumTransformType == Datum.TYPE_WGS84 && tgtCrsDatumTransformType == Datum.TYPE_UNKNOWN) {
-          return;
-        }
-        if (srcCrsDatumTransformType == Datum.TYPE_UNKNOWN && tgtCrsDatumTransformType == Datum.TYPE_WGS84) {
-          return;
-        }
 
         /* -------------------------------------------------------------------- */
         /*	If this datum requires grid shifts, then apply it to geodetic    */
         /*      coordinates.                                                    */
         /* -------------------------------------------------------------------- */
-        if (srcCrsDatumTransformType == Datum.TYPE_GRIDSHIFT) {
+        if (srcCRS.getDatum().getTransformType() == Datum.TYPE_GRIDSHIFT) {
             srcCRS.getDatum().shift(pt);
         }
 
@@ -244,7 +227,7 @@ public class BasicCoordinateTransform implements CoordinateTransform {
         /* -------------------------------------------------------------------- */
         /*      Apply grid shift to destination if required.                    */
         /* -------------------------------------------------------------------- */
-        if (tgtCrsDatumTransformType == Datum.TYPE_GRIDSHIFT) {
+        if (tgtCRS.getDatum().getTransformType() == Datum.TYPE_GRIDSHIFT) {
             tgtCRS.getDatum().inverseShift(pt);
         }
     }
